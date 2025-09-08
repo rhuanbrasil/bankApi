@@ -5,3 +5,8 @@ Implementar updater no mapper
 
 iniciar os services -
   FINALIZAR OS SERVICES DE TRANSACTIONS
+  rever os metodos e ver se da pra reutilizar o metodo de deposit dentro do withdraw etc
+    adicionar o tratamento de  erros, no service, com else{
+                        if
+                        if
+    }
