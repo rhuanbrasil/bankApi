@@ -8,21 +8,16 @@ import com.api.bankApi.infra.enums.TransactionEnums;
 import com.api.bankApi.infra.enums.UserRole;
 import com.api.bankApi.infra.repository.AccountRepository;
 import com.api.bankApi.infra.repository.TransactionRepository;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
+import org.hibernate.TransactionException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,10 +46,36 @@ class TransactionsServiceTest {
     @Test
     @DisplayName("Should throw TransactionExceptions(O número informado não corresponde a conta alguma!)")
     void processDeposit2() {
+        User destination = new User(1L, "Rhuan", "12345", UserRole.USER);
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionEnums.DEPOSIT);
+        transaction.setAmount(new BigDecimal("0"));
+        transaction.setDestinationAccountId(1L);
+
+        when(accRepo.findById(1L)).thenReturn(null);
+
+        Exception thrown = Assertions.assertThrows(RuntimeException.class,()->service.processDeposit(transaction));
+
+        Assertions.assertEquals("O número informado não corresponde a conta alguma!", thrown.getMessage());
+
     }
     @Test
     @DisplayName("Should throw TransactionExceptions(O valor de deposito deve ser maior que zero!)")
     void processDeposit3() {
+        User destination = new User(1L, "Rhuan", "12345", UserRole.USER);
+        Account account = new Account(1L, BigDecimal.ZERO, destination);
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionEnums.DEPOSIT);
+        transaction.setAmount(new BigDecimal("0"));
+        transaction.setDestinationAccountId(1L);
+
+        when(accRepo.findById(1L)).thenReturn(account);
+
+        Exception thrown = Assertions.assertThrows(RuntimeException.class,()->service.processDeposit(transaction));
+
+        Assertions.assertEquals("O valor de deposito deve ser maior que zero!", thrown.getMessage());
+
+
     }
     @Test
     @DisplayName("Should make a deposit and create a transaction")
