@@ -1,5 +1,6 @@
 package com.api.bankApi.business;
 
+import com.api.bankApi.business.dtos.UserRegisterDto;
 import com.api.bankApi.business.mapstruct.TransactionMapper;
 import com.api.bankApi.infra.entitys.Account;
 import com.api.bankApi.infra.entitys.Transaction;
@@ -36,6 +37,8 @@ class TransactionsServiceTest {
 
     @InjectMocks
     TransactionsService service;
+
+
 
 
 
@@ -88,12 +91,36 @@ class TransactionsServiceTest {
         transaction.setDestinationAccountId(1L);
 
         when(accRepo.findById(1L)).thenReturn(account);
-
-
         service.processDeposit(transaction);
 
         verify(repo, times(1)).save(any(Transaction.class));
         verify(accRepo, times(1)).save(account);
+    }
+    @Test
+    @DisplayName("Should make a transfer")
+    void processTransfer(){
+        User source = new User(1L, "Rhuan", "12345", UserRole.USER);
+        Account sourceAccount = new Account(1L, new BigDecimal("150"), source);
+
+        User destination = new User(2L, "Rhuan2", "12345", UserRole.USER);
+        Account destinationAccount = new Account(1L, new BigDecimal("150"), destination);
+
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionEnums.TRANSFER);
+        transaction.setAmount(new BigDecimal("100.00"));
+        transaction.setDestinationAccountId(2L);
+        transaction.setSourceAccountId(1L);
+
+        when(accRepo.findById(1L)).thenReturn(sourceAccount);
+        when(accRepo.findById(2L)).thenReturn(destinationAccount);
+
+        service.processTransfer(transaction);
+
+
+
+
+        verify(repo, times(1)).save(any(Transaction.class));
+        verify(accRepo, times(2)).save(any(Account.class));
 
     }
 
